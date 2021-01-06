@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Scanner;
 import java.util.Vector;
 
 public class LZW {
@@ -56,6 +57,85 @@ public class LZW {
         }
         return -1;
     }
+    public void Compress(String path , String name) {
+        String text = new String();
+        String compressed = new String ("") ;
+        Vector<String> d = new Vector<String>() ;
 
+        try {
+            text = ReadFromFile(path);
+        } catch (IOException e) {}
+
+        int len = text.length();
+        String end = "";
+
+        for (int i = 0; i<len; i++)
+        {
+            String curr =new String("");
+            curr += (text.toCharArray()[i]) ;
+            int ptr = 0 ;
+            while (Exist(curr, d)!=-1)
+            {
+                i++;
+                ptr = Exist(curr , d) ;
+
+                if (i==len)
+                    break ;
+                curr += text.toCharArray()[i];
+
+            }
+            d.addElement(curr);
+            end += curr ;
+
+            compressed+=ptr+" ";
+            i--;
+        }
+
+        WriteToFile(compressed , name);
+
+    }
+    public void Decompress(String path , String name) {
+        String text = new String();
+        String decompressed = new String ("") ;
+        Vector<String> d = new Vector<String>() ;
+        try {
+            text = ReadFromFile(path);
+        } catch (IOException e) {}
+
+        int len = text.length();
+        Scanner stream = new Scanner (text) ;
+        String temp = "" ;
+        while (stream.hasNextInt())
+        {	String Decomp = "" ;
+            int curr = stream.nextInt();
+            boolean exist = false , unknown = true ;
+            if (curr<=127)
+            {
+                exist = true ;
+                String str = "" ;
+                str += (char)curr ;
+                Decomp=str ;
+            }
+            else
+            {
+                if (curr-128 < d.size())
+                    Decomp=d.get(curr-128) ;
+
+                else
+                {
+                    Decomp = (temp + temp.toCharArray()[0]);
+                }
+            }
+
+            decompressed+=Decomp ;
+
+            if ((temp+Decomp.toCharArray()[0]).length() > 1)
+                d.add(temp+Decomp.toCharArray()[0]);
+
+            temp = Decomp;
+
+        }
+        WriteToFile(decompressed , name);
+    }
 
 }
